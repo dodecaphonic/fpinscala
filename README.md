@@ -4,4 +4,4 @@ Slowly working through Paul Chiusano's and Rúnar Bjarnason's "Functional Progra
 
 ## LICENSE
 
-Do whatever you want with this. Hiring me, possibly.
+Do whatever you want with this. Even scorn me for my meager FP skills.
