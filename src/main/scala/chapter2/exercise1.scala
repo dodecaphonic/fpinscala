@@ -1,6 +1,6 @@
 import scala.annotation._
 
-object Fibber {
+object Exercise1 {
   def fib(n: Long): Long = {
     @tailrec
     def go(a: Long, b: Long, m: Long): Long = {

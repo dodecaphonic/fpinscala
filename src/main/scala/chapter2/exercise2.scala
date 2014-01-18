@@ -1,6 +1,6 @@
 import scala.annotation.tailrec
 
-object SortInquirer {
+object Exercise2 {
   // Given a sequence, determine that it's sorted according to a predicate
   // function taking two arguments.
   def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = {
