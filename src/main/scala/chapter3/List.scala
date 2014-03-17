@@ -88,9 +88,41 @@ object List {
     foldRight(a1, a2)((v, l) => Cons(v, l))
 
   def append3[A](a1: List[A], a2: List[A]): List[A] =
-    foldRight2(a1, a2)((v, l) => Cons(v, l))
+    foldRightFromFoldLeft(a1, a2)((v, l) => Cons(v, l))
 
   // Tried this one many times, cheated and looked at the answer.
   def concat[A](ll: List[List[A]]): List[A] =
     foldLeft(ll, Nil:List[A])(append)
+
+  def addOne(xs: List[Int]): List[Int] =
+    foldRight(xs, Nil:List[Int])((v, acc) => Cons[Int](v + 1, acc))
+
+  def map[A,B](xs: List[A])(f: A => B): List[B] =
+    foldRight(xs, Nil:List[B])((v, acc) => Cons[B](f(v), acc))
+
+  def filter[A](l: List[A])(f: A => Boolean): List[A] =
+    foldRight(l, Nil:List[A])((v, acc) =>
+      if (f(v)) Cons[A](v, acc)
+      else acc
+    )
+
+  def flatMap[A,B](l: List[A])(f: A => List[B]): List[B] =
+    foldRight(l, Nil:List[B])((v, acc) => append(f(v), acc))
+
+  def filter2[A](l: List[A])(f: A => Boolean): List[A] =
+    flatMap(l)(v => if (f(v)) Cons(v, Nil:List[A]) else Nil:List[A])
+
+  // My first pass was much much stupider, as I didn't know you could
+  // match on more than one thing (actually, a Tuple in this case)
+  def addPairWise(xs: List[Int], ys: List[Int]): List[Int] = (xs, ys) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addPairWise(t1, t2))
+  }
+
+  def zipWith[A,B,C](xs: List[A], ys: List[B])(f: (A, B) => C):List[C] = (xs, ys) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
 }
