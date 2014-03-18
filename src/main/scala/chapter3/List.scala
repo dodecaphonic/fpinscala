@@ -1,4 +1,3 @@
-// package fpinscala.datastructures
 import scala.annotation._
 
 sealed trait List[+A]
@@ -102,6 +101,12 @@ object List {
 
   def filter[A](l: List[A])(f: A => Boolean): List[A] =
     foldRight(l, Nil:List[A])((v, acc) =>
+      if (f(v)) Cons[A](v, acc)
+      else acc
+    )
+
+  def filter1[A](l: List[A])(f: A => Boolean): List[A] =
+    foldRightFromFoldLeft(l, Nil:List[A])((v, acc) =>
       if (f(v)) Cons[A](v, acc)
       else acc
     )
