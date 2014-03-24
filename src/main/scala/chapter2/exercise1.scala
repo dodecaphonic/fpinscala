@@ -1,3 +1,5 @@
+package fpinscala
+
 import scala.annotation._
 
 object Exercise1 {

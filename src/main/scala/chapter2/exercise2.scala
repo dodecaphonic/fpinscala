@@ -1,3 +1,5 @@
+package fpinscala
+
 import scala.annotation.tailrec
 
 object Exercise2 {

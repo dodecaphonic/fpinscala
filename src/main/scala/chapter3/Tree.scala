@@ -1,3 +1,5 @@
+package fpinscala
+
 import scala.annotation._
 
 sealed trait Tree[+A]
