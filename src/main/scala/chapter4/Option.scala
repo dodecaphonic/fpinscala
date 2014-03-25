@@ -21,9 +21,6 @@ sealed trait Option[+A] {
 
   def filter(f: A => Boolean): Option[A] =
     flatMap(a => if (f(a)) Some(a) else None)
-
-  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
-    a.flatMap(aa => b map (bb => f(aa, bb)))
 }
 
 case class Some[+A](get: A) extends Option[A]
@@ -38,6 +35,9 @@ object Option {
   def variance(xs: Seq[Double]): Option[Double] =
     mean(xs).flatMap(m => mean(xs.map(x => Math.pow(x - m, 2))))
 
+  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
+    a.flatMap(aa => b map (bb => f(aa, bb)))
+
   def sequence[A](a: List[Option[A]]): Option[List[A]] =
     a.foldRight[Option[List[A]]](Some(Nil))((x, y) => map2(x, y)(_ :: _))
 
@@ -46,11 +46,28 @@ object Option {
     case h :: t => h.flatMap(hh => sequence(t).map(hh :: _))
   }
 
+  def traverse[A,B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+    case Nil => Some(Nil)
+    case h :: t => map2(f(h), traverse(t)(f))(_ :: _)
+  }
+
+  def sequenceFromTraverse[A](a: List[Option[A]]): Option[List[A]] =
+    traverse(a)(v => v)
+
+  def Try[A](a: => A): Option[A] =
+    try Some(a)
+    catch { case e: Exception => None }
 }
 
 object Runner {
   def main(args: Array[String]) = {
     println(Option.mean(List(4, 36, 45, 50, 75)))
     println(Option.variance(List(4, 36, 45, 50, 75)))
+    println(Option.sequence(List(Some(1), Some(2), Some(3))))
+    println(Option.sequence(List(Some(1), Some(2), None)))
+    println(Option.sequenceFromTraverse(List(Some(1), Some(2), Some(3))))
+    println(Option.sequenceFromTraverse(List(Some(1), Some(2), None)))
+    println(Option.traverse(List(1, 2, 3))(Some(_)))
+    println(Option.traverse(List(1, 2, 3))(v => if (v == 2) None else Some(v)))
   }
 }
