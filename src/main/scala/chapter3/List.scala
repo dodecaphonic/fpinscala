@@ -1,4 +1,4 @@
-package fpinscala
+package fpinscala.collections
 
 import scala.annotation._
 
@@ -112,6 +112,9 @@ object List {
       if (f(v)) Cons[A](v, acc)
       else acc
     )
+
+  def prepend[A](l: List[A], a: A): List[A] =
+    Cons(a, l)
 
   def flatMap[A,B](l: List[A])(f: A => List[B]): List[B] =
     foldRight(l, Nil:List[B])((v, acc) => append(f(v), acc))
