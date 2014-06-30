@@ -58,5 +58,77 @@ class StreamSpec extends Specification {
       stream.filter(_ % 2 != 0).toList must beEqualTo(List(1, 3))
       Stream.empty[Int].map(_ % 2 == 0) must beEqualTo(Empty)
     }
+
+    "append" in {
+      stream.append(Stream(5, 6)).toList must beEqualTo(List(1, 2, 3, 4, 5, 6))
+    }
+
+    "flatMap" in {
+      stream.flatMap(v => Stream(v)).toList must beEqualTo(List(1, 2, 3, 4))
+    }
+
+    "constant" in {
+      Stream.constant(2).forAll(_ % 2 != 0) must beFalse
+    }
+
+    "from" in {
+      Stream.from(10).take(5).toList must beEqualTo(List(10, 11, 12, 13, 14))
+    }
+
+    "fibs" in {
+      Stream.fibs.take(5).toList must beEqualTo(List(0, 1, 1, 2, 3))
+    }
+
+    "unfold" in {
+      Stream.unfold(0)(s => Some(s, s + 1)).take(5).toList must beEqualTo(List(0, 1, 2, 3, 4))
+    }
+
+    "from2" in {
+      Stream.from2(0).take(5).toList must beEqualTo(List(0, 1, 2, 3, 4))
+    }
+
+    "fibs2" in {
+      Stream.fibs2.take(5).toList must beEqualTo(List(0, 1, 1, 2, 3))
+    }
+
+    "constant2" in {
+      Stream.constant2("a").take(5).toList must beEqualTo(List("a", "a", "a", "a", "a"))
+    }
+
+    "ones2" in {
+      Stream.ones2.take(5).toList must beEqualTo(List(1, 1, 1, 1, 1))
+    }
+
+    "map2" in {
+      Stream(1, 2, 3).map2(_ * 2).toList must beEqualTo(List(2, 4, 6))
+    }
+
+    "take2" in {
+      Stream(1, 2, 3).take2(2).toList must beEqualTo(List(1, 2))
+    }
+
+    "takeWhile2" in {
+      Stream(1, 2, 3, 4, 5).takeWhile(_ < 4).toList must beEqualTo(List(1, 2, 3))
+    }
+
+    "zipWith" in {
+      Stream(1, 2, 3).zipWith(Stream(4, 5, 6))((a, b) => b - a).toList must beEqualTo(List(3, 3, 3))
+    }
+
+    "zipAll" in {
+      Stream(1, 2, 3).zipAll(Stream(4, 5)).toList must beEqualTo(List((Some(1), Some(4)), (Some(2), Some(5)), (Some(3), None)))
+    }
+
+    "startsWith" in {
+      Stream(1, 2, 3).startsWith(Stream(1, 2)) must beTrue
+    }
+
+    "tails" in {
+      Stream(1, 2, 3).tails.map(_.toList).toList must beEqualTo(List(List(1, 2, 3), List(2, 3), List(3), List()))
+    }
+
+    "tails2" in {
+      Stream(1, 2, 3).tails.map(_.toList).toList must beEqualTo(List(List(1, 2, 3), List(2, 3), List(3), List()))
+    }
   }
 }
