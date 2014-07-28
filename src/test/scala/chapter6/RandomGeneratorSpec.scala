@@ -24,27 +24,17 @@ class RandomGeneratorSpec extends Specification with ScalaCheck {
       d >= 0.0 && d <= 1.0
     })
 
-    "intDouble" ! prop((s: Long) => {
-      val ((i, d), r) = RNG.intDouble(defaultSimple)
-      i.toDouble != d
-    })
-
-    "doubleInt" ! prop((s: Long) => {
-      val ((d, i), r) = RNG.doubleInt(defaultSimple)
-      i.toDouble != d
-    })
-
     "double3" ! prop((s: Long) => {
-      val ((d, d1, d2), r) = RNG.double3(defaultSimple)
+      val ((d, d1, d2), r) = RNG.double3(simple(s))
       d != d1 && d1 != d2
     })
 
     "ints" ! prop { (s: Long) =>
-      val (l, r) = RNG.ints(10)(defaultSimple)
+      val (l, r) = RNG.ints(10)(simple(s))
       l.length == 10 &&  l.distinct.length == 10
     }
 
-    "nonNegativeInt" ! prop { (s: Long) => RNG.nonNegativeEven(defaultSimple)._1 % 2 == 0 }
+    "nonNegativeInt" ! prop { (s: Long) => RNG.nonNegativeEven(simple(s))._1 % 2 == 0 }
 
     "doubleFromMap" ! prop((s: Long) => {
       val (d, _) = RNG.doubleFromMap(simple(s))
@@ -52,13 +42,38 @@ class RandomGeneratorSpec extends Specification with ScalaCheck {
     })
 
     "doubleIntFromMap2" ! prop((s: Long) => {
-      val ((d, i), r) = RNG.doubleIntFromMap2(defaultSimple)
+      val ((d, i), r) = RNG.doubleIntFromMap2(simple(s))
       i.toDouble != d
     })
 
     "intDoubleFromMap2" ! prop((s: Long) => {
-      val ((i, d), r) = RNG.intDoubleFromMap2(defaultSimple)
+      val ((i, d), r) = RNG.intDoubleFromMap2(simple(s))
       i.toDouble != d
+    })
+
+    "sequence" in {
+      val fs = List(RNG.unit(10), RNG.unit(20), RNG.unit(40))
+      val ss = RNG.sequence(fs)
+      val (sfs, rng) = ss(defaultSimple)
+      sfs must beEqualTo(List(10, 20, 40))
+      rng must beEqualTo(defaultSimple)
+    }
+
+    "intsFromSequence" in {
+      val ss = RNG.intsFromSequence(5)
+      val (fs, rng) = ss(defaultSimple)
+      fs.length must beEqualTo(5)
+      fs.distinct.length must beEqualTo(5)
+    }
+
+    "mapFromFlatMap" in {
+      val rng = defaultSimple
+      RNG.doubleFromMapFromFlatMap(rng) must beEqualTo(RNG.doubleFromMap(rng))
+    }
+
+    "intDoubleFromMap2FromFlatMap" ! prop((s: Long) => {
+      val rng = defaultSimple
+      RNG.intDoubleFromMap2FromFlatMap(rng) must beEqualTo(RNG.intDoubleFromMap2(rng))
     })
   }
 }

@@ -4,13 +4,12 @@ trait RNG {
   def nextInt: (Int, RNG)
 }
 
-
 object RNG {
   case class Simple(seed: Long) extends RNG {
     def nextInt: (Int, RNG) = {
       val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
       val nextRNG = Simple(newSeed)
-       val n = (newSeed >>> 16).toInt
+      val n = (newSeed >>> 16).toInt
 
       (n, nextRNG)
     }
@@ -88,4 +87,71 @@ object RNG {
 
   def intDoubleFromMap2: Rand[(Int, Double)] =
     both(int, double)
+
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    fs.foldRight[Rand[List[A]]](unit(Nil))((a, b) => map2(a, b)((_ :: _)))
+
+  def intsFromSequence(count: Int): Rand[List[Int]] =
+    sequence(List.fill(count)(int))
+
+  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] =
+    rng => {
+      val (v, rng2) = f(rng)
+      g(v)(rng2)
+    }
+
+  def mapFromFlatMap[A,B](s: Rand[A])(f: A => B): Rand[B] =
+    flatMap(s)(v => unit(f(v)))
+
+  def map2FromFlatMap[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    flatMap(ra)(va => flatMap(rb)(vb => unit(f(va, vb))))
+
+  def intDoubleFromMap2FromFlatMap: Rand[(Int, Double)] =
+    map2FromFlatMap(int, double)((_, _))
+
+  def doubleFromMapFromFlatMap: Rand[Double] =
+    mapFromFlatMap(nonNegativeInt)(i => i / (Int.MaxValue.toDouble + 1))
+}
+
+import State._
+
+case class State[S,+A](run: S => (A,S)) {
+  def flatMap[B](f: A => State[S,B]): State[S,B] = State(s => {
+    val (v, ns) = run(s)
+    f(v).run(ns)
+  })
+
+  def map[B](f: A => B): State[S,B] =
+    flatMap(a => unit(f(a)))
+
+  def map2[B,C](sb: State[S,B])(f: (A, B) => C): State[S,C] =
+    flatMap(a => sb.flatMap(b => unit(f(a, b))))
+}
+
+object State {
+  type Rand[A] = State[RNG,A]
+
+  def unit[S,A](a: A): State[S,A] = State(s => (a, s))
+
+  def sequence[S,A](fs: List[State[S,A]]): State[S,List[A]] =
+    fs.foldRight[State[S,List[A]]](unit(Nil))((sa, acc) => sa.map2(acc)((_ :: _)))
+
+  def modify[S](f: S => S): State[S, Unit] = for {
+    s <- get
+    _ <- set(f(s))
+  } yield ()
+
+  def get[S]: State[S,S] = State(s => (s, s))
+
+  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+}
+
+sealed trait Input
+case object Coin extends Input
+case object Turn extends Input
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+
+object Machine {
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
 }
