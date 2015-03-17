@@ -2,7 +2,7 @@ name := "functional_programming_scala"
 
 version := "1.0"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.4"
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 

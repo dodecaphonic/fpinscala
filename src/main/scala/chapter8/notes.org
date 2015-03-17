@@ -1,0 +1,14 @@
+# Exercises
+
+* 8.1 - Properties of sum: List[Int]
+** The sum of a list of elements of the same value should be the first multiplied by the length
+** Summing the sum of a list done twice should yield two times the sum of the first one
+** The sum of an empty list should be zero
+** The sum of a non-empty list should not be zero
+** The sum of a shuffled list should be the same as that of the non-shuffled list
+* 8.2 - Properties of maximum: List[Int]
+** maximum(ls) == ls.sort.last
+** maximum(ls) == ls.sort.reverse.head
+** ~ maximum(ls.sort.drop(1)) == maximum(ls) # Would be falsified if dropping ended up in an Empty list
+** maximum(Nil) == None
+** maximum(List(n)) == n
