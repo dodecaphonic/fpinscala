@@ -12,9 +12,9 @@ case class Gen[+A](sample: State[RNG,A]) {
     Gen(sample.flatMap(a => f(a).sample))
   }
 
-  def listOfN(size: Gen[Int]): Gen[List[A]] = {
-    size.flatMap(n => Gen(State.sequence(List.fill(n)(sample))))
-  }
+  def listOfN(size: Int): Gen[List[A]] = Gen.listOfN(size, this)
+
+  def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(listOfN(_))
 }
 
 object Gen {
